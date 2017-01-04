@@ -127,7 +127,7 @@ namespace n_tictactoe {
                 winner_mark = mark;
 
         // check for three in a column
-        for (unsigned c = 0; c < C; c++)
+        for (unsigned c = 0; c < C; c+=2)
             if (mark == board[top][c]
                 && board[top][c] == board[mid][c]
                 && board[mid][c] == board[bot][c])
