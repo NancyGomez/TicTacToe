@@ -35,12 +35,6 @@ namespace n_tictactoe {
         // Postcondition:
         TicTacToe();
 
-    // ************************** ACCESSORS ********************************
-
-        // Precondition:
-        // Postcondition:
-        void printBoard();
-
     // *************************** METHODS *********************************
 
         // Precondition:
@@ -50,26 +44,15 @@ namespace n_tictactoe {
         // Postcondition:
         void reset();
 
-    // *************************** HELPERS *********************************
-
-        // Precondition:
-        // Postcondition:
-        bool isGameOver();
-        // Precondition:
-        // Postcondition:
-        bool diagonal(char mark);
-        // Precondition:
-        // Postcondition:
-        bool lines(char mark);
-        // Precondition:
-        // Postcondition:
-        void emptyBoard();
-
     private:
         // To label the is_taken parallel 2D array I need 3 values:
         enum taken_labels {False = 0, True = 1, N_A = 2};
-        // To label the spots on the actual on the visual:
+        // To label the indeces more appropriately
         enum spot_labels {top = 0, mid = 2, bot = 4, left = 0, right = 4};
+        // to label the positions on the visual
+        enum positions {tl = 1, tm = 2, tr = 3,
+                        ml = 4, mm = 5, mr = 6,
+                        bl = 7, bm = 8, br = 9};
 
         char board[R][C];
         int is_taken[R][C];
@@ -77,8 +60,38 @@ namespace n_tictactoe {
         char user_mark,
              cpu_mark,
              winner_mark;
-        size_t available;
         size_t taken;
+
+
+        // ************************** ACCESSORS ********************************
+
+            // Precondition:
+            // Postcondition:
+            void printBoard();
+
+        // *************************** HELPERS *********************************
+
+            // Precondition:
+            // Postcondition:
+            bool isGameOver();
+            // Precondition:
+            // Postcondition:
+            bool diagonal(char mark);
+            // Precondition:
+            // Postcondition:
+            bool across(char mark);
+            // Precondition:
+            // Postcondition:
+            void markSpot(int row, int col, char mark);
+            // Precondition:
+            // Postcondition:
+            void cpuTurn();
+            // Precondition:
+            // Postcondition:
+            void cpuCalc();
+            // Precondition:
+            // Postcondition:
+            void emptyBoard();
 
     };
     #endif
