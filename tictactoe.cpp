@@ -84,7 +84,8 @@ namespace n_tictactoe {
         }
     }
     void TicTacToe::reset() {
-        TicTacToe();
+        *this = TicTacToe();
+        this->run();
         return;
     }
     bool TicTacToe::isGameOver() {
