@@ -5,7 +5,9 @@ namespace n_tictactoe {
     TicTacToe::TicTacToe() {
         emptyBoard();
         assignMarks();
-        winner_mark = ' ';
+        userWins = false;
+        cpuWins = false;
+        isTie = false;
         taken = 0;
     }
     // ************************** ACCESSORS ********************************
@@ -20,7 +22,7 @@ namespace n_tictactoe {
     // ************************ PUBLIC METHODS ******************************
     void TicTacToe::run() {
         int user_choice;
-        while (!isGameOver()) {
+        while (!isGameOver(userWins, cpuWins, isTie)) {
             printBoard();
             std::cout << "\nMark where? ";
             std::cin >> user_choice;
@@ -75,6 +77,7 @@ namespace n_tictactoe {
                     break;
             }
         }
+        endGame();
     }
     void TicTacToe::reset() {
         *this = TicTacToe();
@@ -122,24 +125,25 @@ namespace n_tictactoe {
         return;
     }
     // ************************ PRIVATE METHODS *****************************
-    bool TicTacToe::isGameOver() {
-        // Checking when the user wins:
-        if (checkAcross(user_mark) || checkDiagonal(user_mark)){
-            printBoard();
-            std::cout << "Congratulations! "; playAgain();
-            return true;
-        // Checking when the user wins:
-    } else if (checkAcross(cpu_mark) || checkDiagonal(cpu_mark)){
-            printBoard();
+    bool TicTacToe::isGameOver(bool &userWins, bool&cpuWins, bool &isTie) {
+        userWins = (checkAcross(user_mark) || checkDiagonal(user_mark));
+        cpuWins = (checkAcross(cpu_mark) || checkDiagonal(cpu_mark));
+        isTie = (taken == TOTAL);
+
+        return (userWins || cpuWins || isTie);
+    }
+    void TicTacToe::endGame() {
+        printBoard();
+        if (userWins) {
+            std::cout << "Congratulations you win! "; playAgain();
+        } else if (cpuWins) {
             std::cout << "You lost! "; playAgain();
-            return true;
-            // otherwise check for a tie (all spots are marked)
-        } else if (taken == TOTAL) {
-            printBoard();
+        } else if (isTie) {
             std::cout << "Tie! "; playAgain();
-            return true;
+        } else {
+            std::cout << "Error!" << '\n';
         }
-        return false;
+        return;
     }
     void TicTacToe::playAgain() {
         char user_choice;
@@ -159,6 +163,7 @@ namespace n_tictactoe {
     }
     bool TicTacToe::checkDiagonal(char mark) {
         // diagonal from top left to bot right
+        char winner_mark = ' ';
         if (mark == board[top][left]
             && board[top][left] == board[mid][mid]
             && board[mid][mid] == board[bot][right])
@@ -172,31 +177,29 @@ namespace n_tictactoe {
     }
     bool TicTacToe::fillDiagonal(char mark) {
         // Checking diagonal
-        size_t mark_t_b, mark_r, mark_c,
-               top_bot = 0, bot_top = 0;
-        bool isTopBot = false, isBotTop = false;
+        size_t mark_top, mark_r, mark_c,
+               count_top = 0, count_bot = 0;
+        bool top_available = false, bot_available = false;
         for (unsigned i = 0, j = R-1; i < R; i+=2, j-=2) {
             // from top left to bot right
             if (board[i][i] == mark)
-                top_bot++;
-            else if (is_taken[i][i] == False){
-                mark_t_b = i;
-                isTopBot = true;
-            }
-
-            // from bot left to top right
+                count_top++;
+            else if (!is_taken[i][i]){
+                mark_top = i;
+                top_available = true;
+            } // from bot left to top right
             if (board[j][i] == mark)
-                bot_top++;
-            else if (is_taken[j][i] == False) {
+                count_bot++;
+            else if (!is_taken[j][i]) {
                 mark_r = j; mark_c = i;
-                isBotTop = true;
+                bot_available = true;
             }
         }
         // if the spot is available and there's 2, complete the diagonal!
-        if (top_bot == 2 && isTopBot){
-            markSpot(mark_t_b, mark_t_b, cpu_mark);
+        if (count_top == 2 && top_available){
+            markSpot(mark_top, mark_top, cpu_mark);
             return true;
-        } else if (bot_top == 2 && isBotTop) {
+        } else if (count_bot == 2 && bot_available) {
             markSpot(mark_r, mark_c, cpu_mark);
             return true;
         }
@@ -204,6 +207,7 @@ namespace n_tictactoe {
     }
     bool TicTacToe::checkAcross(char mark) {
         // check for three in a row
+        char winner_mark = ' ';
         for (unsigned r = 0; r < R; r+=2)
             if (mark == board[r][left]
                 && board[r][left] == board[r][mid]
@@ -230,14 +234,13 @@ namespace n_tictactoe {
                 // Checking rows
                 if (board[r][c] == mark)
                     count_r++;
-                else if (is_taken[r][c] == False){
+                else if (!is_taken[r][c]){
                     row_r = r; row_c = c;
                     r_available = true;
-                }
-                // Checking columns
+                } // Checking columns
                 if (board[c][r] == mark)
                     count_c++;
-                else if (is_taken[c][r] == False) {
+                else if (!is_taken[c][r]) {
                     col_r = c; col_c = r;
                     c_available = true;
                 }
@@ -262,6 +265,36 @@ namespace n_tictactoe {
         }
         return;
     }
+    void TicTacToe::cpuTurn() {
+        if (!isGameOver(userWins, cpuWins, isTie)) {
+            printBoard();
+            std::cout << "\nMy turn...\n\n";
+            // first check if the cpu can win!
+            if (fillAcross(cpu_mark) || fillDiagonal(cpu_mark)){
+                return;
+            // next check if we can stop the user from winning!
+            } else if (fillAcross(user_mark) || fillDiagonal(user_mark)){
+                return;
+            // then, check if the middle is claimable!
+            } else if (!is_taken[mid][mid]) {
+                markSpot(mid, mid, cpu_mark);
+            // if not, take any corners!
+            } else if (availableCorner()) {
+                return;
+            // otherwise, take what's left :(
+            } else {
+                for (unsigned r = 0; r < R; r++) {
+                    for (unsigned c = 0; c < C; c++) {
+                        if (!is_taken[r][c]){
+                            markSpot(r, c, cpu_mark);
+                            return;
+                        }
+                    }
+                } // end outter for
+            } // end else
+        }
+        return;
+    }
     bool TicTacToe::availableCorner() {
         if (!is_taken[top][left]) {
             markSpot(top, left, cpu_mark);
@@ -278,33 +311,4 @@ namespace n_tictactoe {
         }
         return false;
     }
-    void TicTacToe::cpuTurn() {
-        printBoard();
-        std::cout << "\nMy turn...\n\n";
-        // first check if the cpu can win!
-        if (fillAcross(cpu_mark) || fillDiagonal(cpu_mark)){
-            return;
-        // next check if we can stop the user from winning!
-        } else if (fillAcross(user_mark) || fillDiagonal(user_mark)){
-            return;
-        // then, check if the middle is claimable!
-        } else if (is_taken[mid][mid] == False) {
-            markSpot(mid, mid, cpu_mark);
-        // if not, take any corners!
-        } else if (availableCorner()) {
-            return;
-        // otherwise, take what's left :(
-        } else {
-            for (unsigned r = 0; r < R; r++) {
-                for (unsigned c = 0; c < C; c++) {
-                    if (!is_taken[r][c]){
-                        markSpot(r, c, cpu_mark);
-                        return;
-                    }
-                }
-            } // end outter for
-        }
-        return;
-    }
-
 } // end namespace!

@@ -15,13 +15,15 @@
 //      3 Jan 2017 - Added the bare bones as well as the logic for ending the
 //                   game. Much is left!
 //      4 Jan 2017 - Added some functionality to the skeleton which allows the user to
-//                   play. The cpu doesn't make intelligent decisions as of now.
+//                   play.
 //                 - Added the functions fillAcross and fillDiagonal which can be
 //                   used so that the cpu can connect any diagonals or row/columns and
-//                   stops the user from completing 3 consecutive marks. Also added this
-//                   order of priority: win, block, take middle, take corner, next available.
-//                   Now the computer is challenging to play against :)
+//                   stops the user from completing 3 consecutive marks.
 //                   Important TODO: Ties may result in the cpu taking the last turn anyway
+//      5 Jan 2017 - Reviewed the code looking for improvements, managed to stop the
+//                   bug where the Cpu would take a turn after the user wins or tried to when
+//                   there was a tie. TODO: Add a cpu behavior that adds a mark in the same
+//                   row, column, or diagonal if one is already present. Perhaps called chain()
 //
 //
 // *****************************************************************************
@@ -47,7 +49,7 @@ namespace n_tictactoe {
 
         // Precondition: Default constructor, takes in no paramaters.
         // Postcondition: Calls the emptyBoard func and the assignMarks func. All other
-        //                values are set to a space or 0.
+        //                values are set to false or 0.
         TicTacToe();
 
     // *************************** METHODS *********************************
@@ -59,11 +61,12 @@ namespace n_tictactoe {
         //****************************************************************************
         // Precondition: Takes in no paramaters.
         // Postcondition: Calls the default constructor to reinstate itself and then Calls
-        //                the run function.
+        //                the run function with the arrow syntax.
         void reset();
 
     private:
-        // To label the is_taken parallel 2D array I need 3 values:
+        // Used an enum instead of bools for the sake of not labeling the dashes
+        // and pipes true or false, those are not applicable.
         enum taken_labels {False = 0, True = 1, N_A = 2};
         // To label the indeces more appropriately
         enum spot_labels {top = 0, mid = 2, bot = 4, left = 0, right = 4};
@@ -72,13 +75,18 @@ namespace n_tictactoe {
                         ml = 4, mm = 5, mr = 6,
                         bl = 7, bm = 8, br = 9};
 
+        // game board with parallel board to define spot availablility
         char board[R][C];
         int is_taken[R][C];
 
+        // Markers
         char user_mark,
-             cpu_mark,
-             winner_mark;
+             cpu_mark;
         size_t taken;
+        // To determine what to to print
+        bool userWins,
+             cpuWins,
+             isTie;
 
     // ************************** ACCESSORS ********************************
 
@@ -104,15 +112,20 @@ namespace n_tictactoe {
         //                columns are assigned to pipes (to create a board)
         void emptyBoard();
 
-    // *************************** METHODS *********************************
+    // *************************** METHODS *******************************************
 
-        // Precondition: Takes in no paramaters.
-        // Postcondition: Calls the diagonal and across functions on both the user's
-        //                mark as well as the cpu's mark to end the game when either
-        //                wins or if there's a tie.
-        bool isGameOver();
+        // Precondition: Takes in two bools (pass by reference, will be mutated).
+        // Postcondition: Will call all the specific win cases one by one
+        //                and mutates the bools to represent the current instance
+        //                of the game.        //
+        bool isGameOver(bool &userWins, bool&cpuWins, bool &isTie);
         //****************************************************************************
-
+        // Precondition: Takes in no paramaters.
+        // Postcondition: Checks each of the member booleans and prints an appropriate
+        //                message for the way the game ended. Then calls the play again
+        //                function so the user has the chance to play again.
+        void endGame();
+        //****************************************************************************
         // Precondition: Takes in no paramaters.
         // Postcondition: Prompts the user to answer whether they'd like to play again,
         //                if the answer is yes, then it calls the reset function.
