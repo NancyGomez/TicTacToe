@@ -22,7 +22,7 @@ namespace n_tictactoe {
     // ************************ PUBLIC METHODS ******************************
     void TicTacToe::run() {
         int user_choice;
-        while (!isGameOver(userWins, cpuWins, isTie)) {
+        while (!isGameOver()) {
             printBoard();
             std::cout << "\nMark where? ";
             std::cin >> user_choice;
@@ -125,7 +125,7 @@ namespace n_tictactoe {
         return;
     }
     // ************************ PRIVATE METHODS *****************************
-    bool TicTacToe::isGameOver(bool &userWins, bool&cpuWins, bool &isTie) {
+    bool TicTacToe::isGameOver() {
         userWins = (checkAcross(user_mark) || checkDiagonal(user_mark));
         cpuWins = (checkAcross(cpu_mark) || checkDiagonal(cpu_mark));
         isTie = (taken == TOTAL);
@@ -266,7 +266,7 @@ namespace n_tictactoe {
         return;
     }
     void TicTacToe::cpuTurn() {
-        if (!isGameOver(userWins, cpuWins, isTie)) {
+        if (!isGameOver()) {
             printBoard();
             std::cout << "\nMy turn...\n\n";
             // first check if the cpu can win!

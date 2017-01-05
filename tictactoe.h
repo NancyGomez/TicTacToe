@@ -114,11 +114,11 @@ namespace n_tictactoe {
 
     // *************************** METHODS *******************************************
 
-        // Precondition: Takes in two bools (pass by reference, will be mutated).
+        // Precondition: Takes in no paramaters.
         // Postcondition: Will call all the specific win cases one by one
-        //                and mutates the bools to represent the current instance
-        //                of the game.        //
-        bool isGameOver(bool &userWins, bool&cpuWins, bool &isTie);
+        //                and mutates the member bools to represent the current instance
+        //                of the game.
+        bool isGameOver();
         //****************************************************************************
         // Precondition: Takes in no paramaters.
         // Postcondition: Checks each of the member booleans and prints an appropriate
