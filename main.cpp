@@ -2,7 +2,8 @@
 
 */
 
-#include "tictactoe.h"
+#include "tictactoe.h" // tictactoe game
+#include <cstdlib>     // exit_success
 using namespace n_tictactoe;
 
 int main() {
